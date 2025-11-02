@@ -2,6 +2,9 @@ import json
 import os
 import polars as pl
 import datetime 
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 Days_Before = 5
 
@@ -72,31 +75,34 @@ Local_wdt_end = #input
 
 #-----------------------------------------------------------------------------------------------------------------
 
-def departure_time(data,city0,city1,arrive_before_time):
-
-    # 1. Calculate the arrival time for all flights # and filter out flights that don't match our criteria. 
-    best_dept_flight = data.with_columns((pl.col("SCHEDULED_DEPARTURE_DATE_TIME_LOCAL") + pl.col("FLIGHT_DURATION")).alias("SCHEDULED_ARRIVAL_DATE_TIME_LOCAL")).filter((pl.col("DEPCITY") == city0) & (pl.col("ARRCITY") == city1) & (pl.col("SCHEDULED_ARRIVAL_DATE_TIME_LOCAL") < arrive_before_time)).sort("SCHEDULED_DEPARTURE_DATE_TIME_LOCAL", descending=True ).head(1) # 3. Select the top one return best_flight
-    #relevant_data = data.filter((pl.col("DEPCITY") == city0) & (pl.col("ARRCITY")) == city1)& (arrive_before_time >pl.col('SCHEDULED_ARRIVAL_DATE_TIME_LOCAL'))
     
-    return best_dept_flight['SCHEDULED_DEPARTURE_DATE_TIME_LOCAL','ESTIMATED_CO2_TOTAL_TONNES']
-
-
-
-
-
-
-
-
-
-
-
-def find_score(dep,arr) :  #---------------------ankith code, 
-    emission = 0          #####    inport data   ##### yerlan code
-    time = 0              #####    inport data   ##### yerlan code
-    return [emission, time]
-
-
-
+    def find_score(data,city0,city1,arrive_before_time,meeting_end):
+    
+        # 1. Calculate the arrival time for all flights # and filter out flights that don't match our criteria. 
+        best_dept_flight = data.with_columns((pl.col("SCHEDULED_DEPARTURE_DATE_TIME_LOCAL") + pl.col("FLIGHT_DURATION")).alias("SCHEDULED_ARRIVAL_DATE_TIME_LOCAL")).filter((pl.col("DEPCITY") == city0) & (pl.col("ARRCITY") == city1) & (pl.col("SCHEDULED_ARRIVAL_DATE_TIME_LOCAL") < arrive_before_time)).sort("SCHEDULED_DEPARTURE_DATE_TIME_LOCAL", descending=True ).head(1) # 3. Select the top one return best_flight
+        #relevant_data = data.filter((pl.col("DEPCITY") == city0) & (pl.col("ARRCITY")) == city1)& (arrive_before_time >pl.col('SCHEDULED_ARRIVAL_DATE_TIME_LOCAL'))
+        
+       # return best_dept_flight['SCHEDULED_DEPARTURE_DATE_TIME_LOCAL','ESTIMATED_CO2_TOTAL_TONNES']
+    
+    
+    
+    
+    #def arrival_time(data,city0,city1,meeting_end):
+    
+        # 1. Calculate the departure time for all flights # and filter out flights that don't match our criteria. 
+        best_arv_flight = data.with_columns((pl.col("SCHEDULED_DEPARTURE_DATE_TIME_LOCAL") + pl.col("FLIGHT_DURATION")).alias("SCHEDULED_ARRIVAL_DATE_TIME_LOCAL")).filter((pl.col("DEPCITY") == city1) & (pl.col("ARRCITY") == city0) & (pl.col("SCHEDULED_DEPARTURE_DATE_TIME_LOCAL") > meeting_end)).sort("SCHEDULED_ARRIVAL_DATE_TIME_LOCAL", descending=False).head(1) # 3. Select the top one return best_flight
+        #relevant_data = data.filter((pl.col("DEPCITY") == city0) & (pl.col("ARRCITY")) == city1)& (arrive_before_time >pl.col('SCHEDULED_ARRIVAL_DATE_TIME_LOCAL'))
+        
+        #return best_arv_flight['SCHEDULED_ARRIVAL_DATE_TIME_LOCAL','ESTIMATED_CO2_TOTAL_TONNES']
+    
+    
+    #def difference():
+        dep_optimal = best_dept_flight['SCHEDULED_DEPARTURE_DATE_TIME_LOCAL','ESTIMATED_CO2_TOTAL_TONNES']#departure_time(data,city0,city1,arrive_before_time)
+        arr_optimal = best_arv_flight['SCHEDULED_ARRIVAL_DATE_TIME_LOCAL','ESTIMATED_CO2_TOTAL_TONNES']#arrival_time(data,city0,city1,meeting_end)
+        difference = dep_optimal['SCHEDULED_DEPARTURE_DATE_TIME_LOCAL'][0] - arrival_time['SCHEDULED_ARRIVAL_DATE_TIME_LOCAL'][0]
+        #return difference
+    velctor = [difference,dep_optimal[1]+arr_optimal[1]]
+    return vector
 
 
 
@@ -153,8 +159,8 @@ for target in targets :   #something to do with if dep and arr being the same gi
             emissions = []
             
             for j in attendees :
-                emissions.append(find_score(j,target)[0])
-                times.append(find_score(j,target)[1])
+                emissions.append(find_score(j,target)[1])
+                times.append(find_score(j,target)[0])
     
             T_emission = sum(emissions)
             A_time = sum(times)/(len(times))
